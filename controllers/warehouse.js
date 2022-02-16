@@ -4,7 +4,9 @@ const utils = require('../utils/utils');
 
 const warehouseController = {
     listWarehouses: (req, res) => {
-        res.status(200).json({warehouses : utils.warehouses});
+        res.set({"Access-Control-Allow-Origin" : "*", 
+        "Access-Control-Allow-Credentials" : true });
+        res.status(200).json(utils.warehouses);
     },
 }
 
