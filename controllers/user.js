@@ -3,26 +3,13 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
 
-// const connectUser = async (email, password) => {
-//     try {
-//         let user = await UserSchema.findOne({ email: email }, (err, user) => {
-//             const match = await bcrypt.compare(password, user.password);
-//             console.log("match", match);
-//             return match;
-//         }).clone();
-//         return user;
-//     } catch (err) {
-//         console.error(err);
-//     }
-    
-// }
 
 const connectUser = async (email, password) => {
     try {
         const user = await UserSchema.findOne({ email: email });
         if (user) {
             const match = await bcrypt.compare(password, user.password);
-            return match;
+            return match? {firstname: user.firstname, lastname: user.lastname, email: user.email, profile: user.profile} : false;
         }
     } catch (err) {
         console.error(err);
@@ -58,7 +45,7 @@ const userController = {
                 const token = jwt.sign({
                     userId: req.body.email,
                 }, 'secret', { expiresIn: "24h" });
-                res.status(200).json({ ok: true, message: "Connection successful", token: token });
+                res.status(200).json({ ok: true, message: "Connection successful", token: token, user: response });
             } else {
                 res.status(200).json({ ok: false, message: "No user found" });
             }
@@ -66,6 +53,7 @@ const userController = {
             console.error(err);
         }
     },
+
 }
 
 module.exports = userController;
