@@ -2,14 +2,14 @@ const UserSchema = require('../models/user');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const jwt = require('jsonwebtoken');
-
+const { generateToken } = require('../helpers/auth');
 
 const connectUser = async (email, password) => {
     try {
-        const user = await UserSchema.findOne({ email: email });
+        const user = await UserSchema.findOne({ email: String(email) });
         if (user) {
             const match = await bcrypt.compare(password, user.password);
-            return match? {firstname: user.firstname, lastname: user.lastname, email: user.email, profile: user.profile} : false;
+            return match? {id: user._id, firstname: user.firstname, lastname: user.lastname, email: user.email, profile: user.profile} : false;
         }
     } catch (err) {
         console.error(err);
@@ -42,9 +42,7 @@ const userController = {
         try {
             let response = await connectUser(req.body.email, req.body.password);
             if (response) {
-                const token = jwt.sign({
-                    userId: req.body.email,
-                }, 'secret', { expiresIn: "24h" });
+                const token = generateToken(response.id);
                 res.status(200).json({ ok: true, message: "Connection successful", token: token, user: response });
             } else {
                 res.status(200).json({ ok: false, message: "No user found" });
